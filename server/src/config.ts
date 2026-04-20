@@ -1,5 +1,11 @@
-import "dotenv/config";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import dotenv from "dotenv";
 import { z } from "zod";
+
+// Load .env from the repo root regardless of CWD (server is launched from /server).
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(HERE, "../../.env") });
 
 const schema = z.object({
   PORT: z.coerce.number().default(8080),
@@ -14,7 +20,9 @@ const schema = z.object({
   POCKETTTS_URL: z.string().url().default("http://127.0.0.1:8000"),
 
   // ASR (local Moonshine via sherpa-onnx-node)
-  MOONSHINE_MODEL_DIR: z.string().default("./models/sherpa-onnx-moonshine-tiny-en-int8"),
+  MOONSHINE_MODEL_DIR: z
+    .string()
+    .default(path.resolve(HERE, "../../models/sherpa-onnx-moonshine-tiny-en-int8")),
 });
 
 export const config = schema.parse(process.env);
